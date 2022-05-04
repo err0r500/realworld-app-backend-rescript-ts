@@ -1,0 +1,37 @@
+{
+  "name": "rescript-project-template",
+  "version": "0.0.1",
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    },
+    {
+      "dir": "libs"
+    },
+    {
+      "dir": "tests",
+      "type": "dev"
+    }
+  ],
+  "package-specs": {
+    "module": "commonjs"
+  },
+  "suffix": ".bs.js",
+  "bs-dependencies": ["@ryyppy/rescript-promise"],
+  "bs-dev-dependencies": ["rescript-test"],
+  "gentypeconfig": {
+    "language": "typescript",
+    "shims": {},
+    "generatedFileExtension": ".gen.ts",
+    "exportInterfaces": true,
+    "module": "commonjs",
+    "debug": {
+      "all": false,
+      "basic": false
+    }
+  },
+  "warnings": {
+    "error": "+101"
+  }
+}

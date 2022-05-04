@@ -1,0 +1,31 @@
+{
+  "name": "rescript-project-template",
+  "version": "0.0.1",
+  "scripts": {
+    "build:ts": "tsc --build ./tsconfig.json",
+    "build": "rescript && npm run build:ts",
+    "build:deps": "rescript build -with-deps",
+    "clean": "rescript clean -with-deps",
+    "start": "node ./lib/js/src/main.bs.js",
+    "build:res": "rescript build -w",
+    "test": "retest './lib/js/tests/*.bs.js'"
+  },
+  "keywords": [
+    "rescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@ryyppy/rescript-promise": "^2.1.0",
+    "@sinclair/typebox": "^0.23.5",
+    "fastify": "^3.29.0",
+    "pino": "^7.11.0",
+    "rescript": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.31",
+    "gentype": "^4.3.0",
+    "rescript-test": "^3.2.0",
+    "typescript": "^4.6.4"
+  }
+}
