@@ -1,5 +1,4 @@
-let do: Registration.pure = _name => {
-  Prelude.ResultAsync.err(Prelude.Err.Tech)
-}
+module RegistrationUC = Registration.UC(LoggerPino)
 
-HttpFastifyI.server.start(do)
+let registrationWithDepsApplied: Registration.pure = RegistrationUC.do(1)
+HttpFastifyI.server.start(registrationWithDepsApplied)
