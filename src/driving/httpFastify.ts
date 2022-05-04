@@ -30,7 +30,7 @@ export const server = {
       },
     });
 
-    fastifyServer.listen(3000, function (err, address) {
+    fastifyServer.listen(3000, function (err, _address) {
       if (err) {
         fastifyServer.log.error(err);
         process.exit(1);
