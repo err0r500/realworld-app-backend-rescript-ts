@@ -22,16 +22,13 @@
   "bs-dev-dependencies": ["rescript-test"],
   "gentypeconfig": {
     "language": "typescript",
-    "shims": {},
-    "generatedFileExtension": ".gen.ts",
-    "exportInterfaces": true,
     "module": "commonjs",
-    "debug": {
-      "all": false,
-      "basic": false
-    }
+    "shims": {},
+    "exportInterfaces": false,
+    "generatedFileExtension": ".gen.ts"
   },
   "warnings": {
     "error": "+101"
   }
 }
+

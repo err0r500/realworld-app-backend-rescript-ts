@@ -48,8 +48,7 @@ module Result = {
 }
 
 module ResultAsync = {
-  @genType type p<'x> = Js.Promise.t<'x>
-  @genType type t<'a, 'e> = p<Belt.Result.t<'a, 'e>>
+  @genType type t<'a, 'e> = Js.Promise.t<Belt.Result.t<'a, 'e>>
 
   let ok = (a: 'a): t<'a, 'e> => Promise.resolve(Ok(a))
   let err = (e: 'e): t<'a, 'e> => Promise.resolve(Error(e))

@@ -13,11 +13,8 @@ let log = (value: 'a, msg: string, f: (Pino.t, string) => unit): 'a => {
   value
 }
 
-@genType
 let info = (a: 'a, s: string): 'a => log(a, s, logInfo)
 
-@genType
 let warn = (a: 'a, s: string): 'a => log(a, s, logWarn)
 
-@genType
 let error = (a: 'a, s: string): 'a => log(a, s, logError)
