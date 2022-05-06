@@ -1,5 +1,5 @@
 import { Static, Type } from "@sinclair/typebox";
-import { name, email, password } from "../../domain/user.gen";
+import { mkName, email, password } from "../../domain/user.gen";
 import { pure as registrationUC } from "../../usecase/registration.gen";
 import { FastifyInstance } from "fastify";
 import { match } from "ts-pattern";
@@ -18,12 +18,12 @@ export const registration = (uc: registrationUC) => {
       Reply: string;
     }>("/", { schema: { body: ReqBody } }, async (req, reply) => {
       const userOrErr = await uc(
-        name(req.body.name),
+        mkName(req.body.name),
         email(req.body.mail),
         password(req.body.password)
       );
 
-      req.log.info(userOrErr)
+      req.log.info(userOrErr);
 
       return match(userOrErr)
         .with({ tag: "Ok" }, ({ value }) => reply.send(value.name.value))

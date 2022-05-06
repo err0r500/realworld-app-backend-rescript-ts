@@ -19,6 +19,8 @@
     "@ryyppy/rescript-promise": "^2.1.0",
     "@sinclair/typebox": "^0.23.5",
     "fastify": "^3.29.0",
+    "knex": "^2.0.0",
+    "pg": "^8.7.3",
     "pino": "^7.11.0",
     "ts-pattern": "^4.0.2"
   },

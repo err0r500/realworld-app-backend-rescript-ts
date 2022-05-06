@@ -2,8 +2,7 @@ import fastify from "fastify";
 import { registration } from "./registration";
 import { pure as registrationUC } from "../../usecase/registration.gen";
 
-export const server = {
-  start: (usecases: { registration: registrationUC }) => {
+export const startServer = (usecases: { registration: registrationUC }) => {
     const fastifyServer = fastify({ logger: true });
 
     fastifyServer.register(registration(usecases.registration));
@@ -14,5 +13,4 @@ export const server = {
         process.exit(1);
       }
     });
-  },
 };

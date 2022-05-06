@@ -1,5 +1,5 @@
-type name = Name(string)
-@genType let name = s => Name(s)
+@genType type name = Name(string)
+@genType let mkName = s => Name(s)
 
 type email = Email(string)
 @genType let email = s => Email(s)

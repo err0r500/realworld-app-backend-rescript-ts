@@ -50,8 +50,8 @@ module Result = {
 module ResultAsync = {
   @genType type t<'a, 'e> = Js.Promise.t<Belt.Result.t<'a, 'e>>
 
-  let ok = (a: 'a): t<'a, 'e> => Promise.resolve(Ok(a))
-  let err = (e: 'e): t<'a, 'e> => Promise.resolve(Error(e))
+  @genType let ok = (a: 'a): t<'a, 'e> => Promise.resolve(Ok(a))
+  @genType let err = (e: 'e): t<'a, 'e> => Promise.resolve(Error(e))
 
   let tryCatch = (f: Promise.t<'a>, onRejected: exn => 'e): t<'a, 'e> =>
     f->Promise.then(ok)->Promise.catch(e => onRejected(e)->err)
@@ -99,6 +99,13 @@ module ResultAsync = {
     fst->flatMap(a => snd->flatMap(b => ok((a, b))))
 }
 
+module Maybe = {
+  @genType type t<'a> = option<'a>
+
+  @genType let just = (a: 'a): t<'a> => Some(a)
+  @genType let nothing = (): t<'a> => None
+}
+
 module Assert = {
   let equals = (a: 'a, b: 'a): bool => a == b
 
@@ -116,7 +123,6 @@ module Assert = {
 }
 
 module Err = {
-  @genType
-  type t<'a> = Business('a) | Tech
-  type techOnly = t<Never.t>
+  @genType type t<'a> = Business('a) | Tech
+  @genType type techOnly = t<Never.t>
 }
