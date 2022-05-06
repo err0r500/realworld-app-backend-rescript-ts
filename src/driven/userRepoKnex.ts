@@ -1,18 +1,17 @@
 import {
-  Maybe_t,
   Maybe_nothing,
-  ResultAsync_t,
   ResultAsync_ok,
-  Err_techOnly,
+  ResultAsync_err,
+  Err_tech,
 } from "../../libs/prelude.gen";
-import { name, t as user } from "../domain/user.gen";
+import { name } from "../domain/user.gen";
+import { UserRepo_getByName } from "../usecase/adapters.gen";
 
-export const UserRepoKnex = {
-  getByName: async (_n: name) => {
-    console.log("hello from UserRepoKnex.getByName");
-    const x: ResultAsync_t<Maybe_t<user>, Err_techOnly> = ResultAsync_ok(
-      Maybe_nothing()
-    );
-    return x;
-  },
+export const UserRepoKnex = () => {
+  const getByName: UserRepo_getByName = async (_n: name) =>
+    1 < 2 ? ResultAsync_ok(Maybe_nothing()) : ResultAsync_err(Err_tech());
+
+  return {
+    getByName: getByName,
+  };
 };

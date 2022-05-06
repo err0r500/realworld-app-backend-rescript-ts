@@ -124,5 +124,7 @@ module Assert = {
 
 module Err = {
   @genType type t<'a> = Business('a) | Tech
+  @genType let business = (a: 'a) => Business(a)
+  @genType let tech = () => Tech
   @genType type techOnly = t<Never.t>
 }
