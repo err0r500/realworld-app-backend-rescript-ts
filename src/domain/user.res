@@ -1,4 +1,4 @@
-type name = Name(string)
+@genType type name = Name(string)
 @genType let name = s => Name(s)
 
 type email = Email(string)

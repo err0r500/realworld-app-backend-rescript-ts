@@ -23,7 +23,7 @@ export const registration = (uc: registrationUC) => {
         password(req.body.password)
       );
 
-      req.log.info(userOrErr)
+      req.log.info(userOrErr);
 
       return match(userOrErr)
         .with({ tag: "Ok" }, ({ value }) => reply.send(value.name.value))

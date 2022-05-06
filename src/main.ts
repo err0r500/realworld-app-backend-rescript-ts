@@ -1,6 +1,7 @@
-import {registrationWithDepsApplied} from "./config.gen"
+import { registrationUC } from "./config.gen";
+import { UserRepoKnex } from "./driven/userRepoKnex";
+import { startServer } from "./driving/httpFastify/_main";
 
-import {server} from "./driving/httpFastify/_main"
+const userRepo = UserRepoKnex();
 
-server.start({registration: registrationWithDepsApplied})
-
+startServer({ registration: registrationUC(userRepo.getByName) });
