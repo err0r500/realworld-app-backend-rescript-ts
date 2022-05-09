@@ -9,3 +9,11 @@ module UserRepo = {
 
   @genType type getByName = User.name => ResultAsync.t<Maybe.t<User.t>, Err.techOnly>
 }
+
+module UuidGenerator = {
+  @genType type genUUID = unit => string
+}
+
+module Crypto = {
+  @genType type hash = string => string
+}

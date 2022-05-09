@@ -12,6 +12,6 @@ export const UserRepoKnex = () => {
     1 < 2 ? ResultAsync_ok(Maybe_nothing()) : ResultAsync_err(Err_tech());
 
   return {
-    getByName: getByName,
+    getByName,
   };
 };

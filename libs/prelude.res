@@ -117,9 +117,12 @@ module Assert = {
         Js.Re.fromString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i"),
         s,
       )
-
     let isNonEmptyString = (s: string): bool => Js.String2.length(s) > 0
   }
+}
+module String = {
+  type nonEmptyString = NonEmptyString(string)
+  let nonEmptyString = s => Assert.String.isNonEmptyString(s) ? Some(NonEmptyString(s)) : None
 }
 
 module Err = {
