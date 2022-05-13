@@ -7,10 +7,11 @@
       "subdirs": true
     },
     {
-      "dir": "features/steps"
+      "dir": "libs"
     },
     {
-      "dir": "libs"
+      "dir": "features/steps",
+      "type": "dev"
     },
     {
       "dir": "tests",
@@ -21,12 +22,8 @@
     "module": "commonjs"
   },
   "suffix": ".bs.js",
-  "bs-dependencies": [
-    "@ryyppy/rescript-promise"
-  ],
-  "bs-dev-dependencies": [
-    "rescript-test"
-  ],
+  "bs-dependencies": ["@ryyppy/rescript-promise"],
+  "bs-dev-dependencies": ["rescript-test"],
   "gentypeconfig": {
     "language": "typescript",
     "module": "commonjs",
@@ -38,3 +35,4 @@
     "error": "+101"
   }
 }
+

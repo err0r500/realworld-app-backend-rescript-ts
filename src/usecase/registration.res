@@ -8,17 +8,31 @@ type businessErrors =
 type input = {name: string, email: string, password: string}
 type pure = input => RA.t<User.t, Err.t<businessErrors>>
 
-@genType type usecase = Adapters.UserRepo.getByName => pure
+@genType type usecase = Adapters.UserRepo.insert => pure
 
 module UC = (Logger: Adapters.Logger) => {
   // we've to write 2 functions here because otherwise we can't partially apply it from the ts side
-  let do: usecase = urGetByName => {
-    let pure: pure = ({name, email: _email, password: _password}) =>
-      // todo : make input fields validation
-      // the idea is nothing prevents calling the domain constructor with the wrong input field (on the ts side)
-      urGetByName(Name(name))
-      ->RA.mapErr(_ => Err.Tech->Logger.error("userRepo.GetByName"))
-      ->RA.flatMap(maybeU => maybeU->RA.fromOption(_ => Err.Business(UserConflict)))
+  let do: usecase = urInsert => {
+    let pure: pure = ({name, email, password}) => {
+      let userToInsert: User.t = {
+        name: Name(name),
+        email: Email(email),
+        password: Password(password),
+        bio: Bio(None),
+        imageLink: ImageLink(None),
+      }
+
+      userToInsert
+      ->urInsert
+      ->RA.mapErr(e =>
+        switch e {
+        | Err.Tech => Err.Tech->Logger.error("userRepo.insert")
+        | Err.Business(EmailConflict) => Err.business(UserConflict)->Logger.error("userRepo.insert")
+        }
+      )
+      ->RA.map(_ => userToInsert)
+    }
+
     pure
   }
 }

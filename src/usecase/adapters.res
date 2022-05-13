@@ -7,7 +7,10 @@ module type Logger = {
 module UserRepo = {
   open Prelude
 
-  @genType type getByName = User.name => ResultAsync.t<Maybe.t<User.t>, Err.techOnly>
+  @genType type getByEmail = User.email => ResultAsync.t<Maybe.t<User.t>, Err.techOnly>
+
+  type insertErr = EmailConflict
+  @genType type insert = User.t => ResultAsync.t<unit, Err.t<insertErr>>
 }
 
 module UuidGenerator = {
