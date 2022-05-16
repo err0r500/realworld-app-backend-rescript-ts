@@ -1,18 +1,37 @@
 open Prelude
 module RA = ResultAsync
 
-type businessErrors = UserConflict
+type businessErrors =
+  | UserConflict
+  | InvalidInput(list<string>)
 
-type pure = (User.name, User.email, User.password) => RA.t<User.t, Err.t<businessErrors>>
+type input = {name: string, email: string, password: string}
+type pure = input => RA.t<User.t, Err.t<businessErrors>>
 
-@genType type usecase = Adapters.UserRepo.getByName => pure
+@genType type usecase = Adapters.UserRepo.insert => pure
 
 module UC = (Logger: Adapters.Logger) => {
-  let do: usecase = urGetByName => {
-    let pure: pure = (name, _email, _password) =>
-      urGetByName(name)
-      ->RA.mapErr(_ => Err.Tech)
-      ->RA.flatMap(maybeU => maybeU->RA.fromOption(_ => Err.Business(UserConflict)))
+  let do: usecase = urInsert => {
+    let pure: pure = ({name, email, password}) => {
+      let userToInsert: User.t = {
+        name: Name(name),
+        email: Email(email),
+        password: Password(password),
+        bio: Bio(None),
+        imageLink: ImageLink(None),
+      }
+
+      userToInsert
+      ->urInsert
+      ->RA.flatMap(_ => RA.ok(userToInsert))
+      ->RA.mapErr(e => {
+        switch e {
+        | Err.Business(EmailConflict) => Err.business(UserConflict)->Logger.error("userRepo.insert")
+        | Err.Tech => Err.Tech->Logger.error("userRepo.insert")
+        }
+      })
+    }
+
     pure
   }
 }

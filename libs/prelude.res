@@ -64,6 +64,8 @@ module ResultAsync = {
       }
     )
 
+  let then = (result: t<'a, 'e>, f: Promise.t<'b>): Promise.t<'b> => result->Promise.then(_ => f)
+
   let fold = (result: t<'a, 'e>, f: Belt.Result.t<'a, 'e> => 'b): Promise.t<'b> =>
     result->Promise.thenResolve(fst => f(fst))
 
@@ -90,8 +92,8 @@ module ResultAsync = {
   let mapErr = (r: t<'a, 'e>, onErr: 'e => 'f): t<'a, 'f> =>
     r->Promise.then(fst =>
       switch fst {
-      | Ok(a) => ok(a)
       | Error(b) => err(onErr(b))
+      | Ok(a) => ok(a)
       }
     )
 
@@ -117,9 +119,12 @@ module Assert = {
         Js.Re.fromString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i"),
         s,
       )
-
     let isNonEmptyString = (s: string): bool => Js.String2.length(s) > 0
   }
+}
+module String = {
+  type nonEmptyString = NonEmptyString(string)
+  let nonEmptyString = s => Assert.String.isNonEmptyString(s) ? Some(NonEmptyString(s)) : None
 }
 
 module Err = {

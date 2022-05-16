@@ -10,8 +10,13 @@
       "dir": "libs"
     },
     {
-      "dir": "tests",
+      "dir": "features/steps",
       "type": "dev"
+    },
+    {
+      "dir": "tests",
+      "type": "dev",
+      "subdirs": true
     }
   ],
   "package-specs": {
@@ -19,7 +24,7 @@
   },
   "suffix": ".bs.js",
   "bs-dependencies": ["@ryyppy/rescript-promise"],
-  "bs-dev-dependencies": ["rescript-test"],
+  "bs-dev-dependencies": ["@dusty-phillips/rescript-zora"],
   "gentypeconfig": {
     "language": "typescript",
     "module": "commonjs",
@@ -31,4 +36,3 @@
     "error": "+101"
   }
 }
-

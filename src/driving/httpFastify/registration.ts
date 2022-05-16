@@ -17,11 +17,11 @@ export const registration = (uc: registrationUC) => {
       Body: ReqBody;
       Reply: string;
     }>("/", { schema: { body: ReqBody } }, async (req, reply) => {
-      const userOrErr = await uc(
-        name(req.body.name),
-        email(req.body.mail),
-        password(req.body.password)
-      );
+      const userOrErr = await uc({
+        name: req.body.name,
+        email: req.body.mail,
+        password: req.body.password,
+      });
 
       req.log.info(userOrErr);
 
@@ -37,6 +37,15 @@ export const registration = (uc: registrationUC) => {
             },
           },
           () => reply.code(409).send()
+        )
+        .with(
+          {
+            tag: "Error",
+            value: {
+              tag: "Business",
+            },
+          },
+          () => reply.code(400).send() // todo : handle 400 errors
         )
         .exhaustive();
     });
