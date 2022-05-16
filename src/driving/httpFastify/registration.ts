@@ -1,5 +1,4 @@
 import { Static, Type } from "@sinclair/typebox";
-import { name, email, password } from "../../domain/user.gen";
 import { pure as registrationUC } from "../../usecase/registration.gen";
 import { FastifyInstance } from "fastify";
 import { match } from "ts-pattern";
@@ -22,8 +21,6 @@ export const registration = (uc: registrationUC) => {
         email: req.body.mail,
         password: req.body.password,
       });
-
-      req.log.info(userOrErr);
 
       return match(userOrErr)
         .with({ tag: "Ok" }, ({ value }) => reply.send(value.name.value))

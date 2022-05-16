@@ -47,11 +47,37 @@ module Result = {
     }
 }
 
+module Validation = {
+  type t<'a> =
+    | Success('a)
+    | Failure(array<string>)
+
+  let map = (f, xResult) =>
+    switch xResult {
+    | Success(x) => Success(f(x))
+    | Failure(errs) => Failure(errs)
+    }
+
+  let apply = (fResult: t<'a => 'b>, xResult: t<'a>): t<'b> =>
+    switch (fResult, xResult) {
+    | (Success(f), Success(x)) => Success(f(x))
+    | (Failure(ee1), Failure(ee2)) => Failure(Js.Array2.concat(ee1, ee2))
+    | (Failure(ee), Success(_)) => Failure(ee)
+    | (Success(_), Failure(ee)) => Failure(ee)
+    }
+}
+
 module ResultAsync = {
   @genType type t<'a, 'e> = Js.Promise.t<Belt.Result.t<'a, 'e>>
 
   @genType let ok = (a: 'a): t<'a, 'e> => Promise.resolve(Ok(a))
   @genType let err = (e: 'e): t<'a, 'e> => Promise.resolve(Error(e))
+
+  let fromValidation = (val: Validation.t<'a>): t<'a, array<string>> =>
+    switch val {
+    | Success(a) => ok(a)
+    | Failure(ee) => err(ee)
+    }
 
   let tryCatch = (f: Promise.t<'a>, onRejected: exn => 'e): t<'a, 'e> =>
     f->Promise.then(ok)->Promise.catch(e => onRejected(e)->err)
