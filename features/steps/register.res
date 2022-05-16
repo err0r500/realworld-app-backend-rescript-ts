@@ -80,7 +80,7 @@ module UserRepo = {
 }
 
 module Registration = {
-  module Uc = Registration.UC(Inmem.Logger)
+  module Uc = Registration.UC(Inmem.Logger())
 
   // fixme : not great, would be better if just declared but not initialized
   let res: ref<RA.t<User.t, Err.t<Registration.businessErrors>>> = ref(RA.ok(dummy))

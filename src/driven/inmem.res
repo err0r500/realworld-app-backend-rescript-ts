@@ -45,15 +45,15 @@ module UserRepo = {
         })
   }
 
-  let doesFail = (f: bool) => {
-    fails := f
+  let doesFail = () => {
+    fails := true
   }
 
   type t = {
     getByEmail: Adapters.UserRepo.getByEmail,
     getByName: User.name => RA.t<option<User.t>, Prelude.Err.techOnly>,
     insert: Adapters.UserRepo.insert,
-    doesFail: bool => unit,
+    doesFail: unit => unit,
   }
 
   let make = () => {
