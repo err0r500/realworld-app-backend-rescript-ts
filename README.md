@@ -44,5 +44,3 @@ curl -XPOST -v localhost:3000/ -d '{"mail": "hello@bla.com", "name": "salut", "p
 # Development
 
 [API contract documentation](https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints)
-
-

@@ -5,6 +5,8 @@ module RA = ResultAsync
 module World = {
   type t = {mutable userRepo: Inmem.UserRepo.t}
 
+  // we don't expect technical errors to happen in business specs
+  // so we fail each time it happens
   let throwOnTechErr = ra =>
     ra->RA.mapErr(err =>
       switch err {
@@ -13,14 +15,16 @@ module World = {
       }
     )
 
-  let wrapTechErrs = (repo: Inmem.UserRepo.t): Inmem.UserRepo.t => {
-    getByEmail: e => repo.getByEmail(e)->throwOnTechErr,
-    getByName: e => repo.getByName(e)->throwOnTechErr,
-    insert: e => repo.insert(e)->throwOnTechErr,
-  }
-
   before(@this (w: t) => {
-    w.userRepo = Inmem.UserRepo.make()->wrapTechErrs
+    w.userRepo = {
+      let repo = Inmem.UserRepo.make()
+      {
+        getByEmail: e => repo.getByEmail(e)->throwOnTechErr,
+        getByName: e => repo.getByName(e)->throwOnTechErr,
+        insert: e => repo.insert(e)->throwOnTechErr,
+        doesFail: repo.doesFail,
+      }
+    }
   })
 }
 
@@ -81,6 +85,10 @@ module Registration = {
   // fixme : not great, would be better if just declared but not initialized
   let res: ref<RA.t<User.t, Err.t<Registration.businessErrors>>> = ref(RA.ok(dummy))
 
+  before(@this _ => {
+    res := RA.ok(dummy)
+  })
+
   let forgeInput = (email: User.email): Registration.input => {
     name: matthieu.name->User.unName,
     password: matthieu.password->User.unPassword,
@@ -122,10 +130,10 @@ module Registration = {
   then("Matthieu is notified about the conflict", @this _ =>
     res.contents
     ->RA.map(_ => Js.Exn.raiseError("expected an error"))
-    ->RA.mapErr(e =>
-      switch e {
+    ->RA.mapErr(err =>
+      switch err {
       | Err.Business(UserConflict) => ()
-      | _ => Js.Exn.raiseError("an error, but not a UserConflict")
+      | _ => Js.Exn.raiseError("an error, but expected a UserConflict")
       }
     )
     ->ignore

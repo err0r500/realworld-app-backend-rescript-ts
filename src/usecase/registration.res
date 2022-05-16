@@ -11,7 +11,6 @@ type pure = input => RA.t<User.t, Err.t<businessErrors>>
 @genType type usecase = Adapters.UserRepo.insert => pure
 
 module UC = (Logger: Adapters.Logger) => {
-  // we've to write 2 functions here because otherwise we can't partially apply it from the ts side
   let do: usecase = urInsert => {
     let pure: pure = ({name, email, password}) => {
       let userToInsert: User.t = {
@@ -24,12 +23,12 @@ module UC = (Logger: Adapters.Logger) => {
 
       userToInsert
       ->urInsert
-      ->RA.mapErr(e =>
+      ->RA.mapErr(e => {
         switch e {
         | Err.Tech => Err.Tech->Logger.error("userRepo.insert")
         | Err.Business(EmailConflict) => Err.business(UserConflict)->Logger.error("userRepo.insert")
         }
-      )
+      })
       ->RA.map(_ => userToInsert)
     }
 

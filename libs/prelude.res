@@ -64,6 +64,8 @@ module ResultAsync = {
       }
     )
 
+  let then = (result: t<'a, 'e>, f: Promise.t<'b>): Promise.t<'b> => result->Promise.then(_ => f)
+
   let fold = (result: t<'a, 'e>, f: Belt.Result.t<'a, 'e> => 'b): Promise.t<'b> =>
     result->Promise.thenResolve(fst => f(fst))
 
