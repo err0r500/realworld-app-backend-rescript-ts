@@ -2,14 +2,16 @@ open Zora
 open Prelude
 module RA = ResultAsync
 
-module UC = Registration.UC(Inmem.Logger)
-
 let make = () => {
+  module Logger = Inmem.Logger()
+  let {getLogs} = module(Logger)
+  module UC = Registration.UC(Logger)
   let userRepo = Inmem.UserRepo.make()
 
   {
     "userRepo": userRepo,
     "pure": UC.do(userRepo.insert),
+    "getLogs": getLogs,
   }
 }
 
@@ -27,51 +29,54 @@ let matthieu: User.t = {
   imageLink: User.ImageLink(None),
 }
 
-zora("visitor registration", t => {
-  t->test("happy path", t => {
-    // G
-    let ctx = make()
+zora("happy patth", t => {
+  // G
+  let ctx = make()
 
-    // W
-    let res = matthieu->forgeInput->ctx["pure"]
+  // W
+  let res = matthieu->forgeInput->ctx["pure"]
 
-    // T
-    res->then(r => {
-      t->equal(Ok(matthieu), r, "returns the user")
-      done()
-    })
+  // T
+  res->then(r => {
+    t->equal(r, Ok(matthieu), "returns the user")
+    t->equal(ctx["getLogs"]()->Js.Array.length, 0, "no logs")
+    done()
   })
+})
 
-  t->test("technical error", t => {
-    // G
-    let ctx = make()
-    ctx["userRepo"].doesFail()->ignore
+zora("technical error", t => {
+  // G
+  let ctx = make()
+  ctx["userRepo"].doesFail(true)->ignore
+  t->equal(ctx["getLogs"]()->Js.Array.length, 0, "check")
 
-    // W
-    let res = matthieu->forgeInput->ctx["pure"]
+  // W
+  let res = matthieu->forgeInput->ctx["pure"]
 
-    // T
-    res->then(r => {
-      t->equal(Error(Err.Tech), r, "returns an Err.Tech")
-      done()
-    })
+  // T
+  res->then(r => {
+    t->equal(r, Error(Err.Tech), "returns an Err.Tech")
+    t->equal(ctx["getLogs"]()->Js.Array.length, 1, "logged err")
+    done()
   })
+})
 
-  t->test("conflict", t => {
-    // G
-    let ctx = make()
-    let preConditions =
-      ctx["userRepo"].insert(matthieu)->RA.mapErr(_ => t->fail("failed to setup pre-conditions"))
+zora("conflict", t => {
+  // G
+  let ctx = make()
+  ctx["userRepo"].doesFail(false)->ignore
+  let preConditions =
+    ctx["userRepo"].insert(matthieu)->RA.mapErr(_ => t->fail("failed to setup pre-conditions"))
 
-    // W
-    let res = preConditions->then(_ => matthieu->forgeInput->ctx["pure"])
+  t->equal(ctx["getLogs"]()->Js.Array.length, 0, "check")
 
-    // T
-    res->then(r => {
-      t->equal(Error(Err.Business(Registration.UserConflict)), r, "returns a UserConflict error")
-      done()
-    })
+  // W
+  let res = preConditions->then(_ => matthieu->forgeInput->ctx["pure"])
+
+  // T
+  res->then(r => {
+    t->equal(r, Error(Err.Business(Registration.UserConflict)), "returns a UserConflict error")
+    t->equal(ctx["getLogs"]()->Js.Array.length, 1, "logged err")
+    done()
   })
-
-  done()
 })

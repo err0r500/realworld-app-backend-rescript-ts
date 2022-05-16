@@ -92,8 +92,8 @@ module ResultAsync = {
   let mapErr = (r: t<'a, 'e>, onErr: 'e => 'f): t<'a, 'f> =>
     r->Promise.then(fst =>
       switch fst {
-      | Ok(a) => ok(a)
       | Error(b) => err(onErr(b))
+      | Ok(a) => ok(a)
       }
     )
 

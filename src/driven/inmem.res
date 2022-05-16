@@ -1,13 +1,17 @@
 open Prelude
 module RA = ResultAsync
 
-module Logger = {
-  let state: array<string> = []
+module Logger = () => {
+  let state: ref<array<string>> = ref([])
 
-  let getLogs = (): array<string> => state
+  let make = () => {
+    state := []
+  }
+
+  let getLogs = (): array<string> => state.contents
 
   let shared = (a: 'a, s: string): 'a => {
-    Js.Array.push(s ++ " : ", state)->ignore
+    Js.Array.push(s ++ " : ", state.contents)->ignore
     a
   }
 
@@ -27,7 +31,7 @@ module UserRepo = {
   let getByEmail = (email: User.email) => _getByPredicate((u: User.t) => u.email == email)
   let getByName = (name: User.name) => _getByPredicate((u: User.t) => u.name == name)
 
-  let insert = (user: User.t) =>
+  let insert = (user: User.t) => {
     fails.contents
       ? RA.err(Prelude.Err.Tech)
       : getByEmail(user.email)->RA.flatMap(mayUser => {
@@ -39,16 +43,17 @@ module UserRepo = {
             }
           }
         })
+  }
 
-  let doesFail = () => {
-    fails := true
+  let doesFail = (f: bool) => {
+    fails := f
   }
 
   type t = {
     getByEmail: Adapters.UserRepo.getByEmail,
     getByName: User.name => RA.t<option<User.t>, Prelude.Err.techOnly>,
     insert: Adapters.UserRepo.insert,
-    doesFail: unit => unit,
+    doesFail: bool => unit,
   }
 
   let make = () => {

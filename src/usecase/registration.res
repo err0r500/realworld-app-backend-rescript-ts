@@ -23,13 +23,13 @@ module UC = (Logger: Adapters.Logger) => {
 
       userToInsert
       ->urInsert
+      ->RA.flatMap(_ => RA.ok(userToInsert))
       ->RA.mapErr(e => {
         switch e {
-        | Err.Tech => Err.Tech->Logger.error("userRepo.insert")
         | Err.Business(EmailConflict) => Err.business(UserConflict)->Logger.error("userRepo.insert")
+        | Err.Tech => Err.Tech->Logger.error("userRepo.insert")
         }
       })
-      ->RA.map(_ => userToInsert)
     }
 
     pure
