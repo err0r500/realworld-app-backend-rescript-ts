@@ -52,9 +52,9 @@ module Validation = {
     | Success('a)
     | Failure(array<string>)
 
-  let map = (f, xResult) =>
-    switch xResult {
-    | Success(x) => Success(f(x))
+  let map = (toApply: 'a => 'b, val: t<'a>) =>
+    switch val {
+    | Success(x) => Success(toApply(x))
     | Failure(errs) => Failure(errs)
     }
 

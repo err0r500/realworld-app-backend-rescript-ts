@@ -3,7 +3,8 @@ open Prelude
 module RA = ResultAsync
 
 module World = {
-  type t = {mutable userRepo: Inmem.UserRepo.t}
+  module UserRepo = Inmem.UserRepo()
+  type t = {mutable userRepo: UserRepo.t}
 
   // we don't expect technical errors to happen in business specs
   // so we fail each time it happens
@@ -17,7 +18,7 @@ module World = {
 
   before(@this (w: t) => {
     w.userRepo = {
-      let repo = Inmem.UserRepo.make()
+      let repo = UserRepo.make()
       {
         getByEmail: e => repo.getByEmail(e)->throwOnTechErr,
         getByName: e => repo.getByName(e)->throwOnTechErr,
