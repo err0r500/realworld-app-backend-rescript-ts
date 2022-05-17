@@ -20,7 +20,7 @@ module Logger = () => {
   let error = (a: 'a, s: string): 'a => shared(a, "error: " ++ s)
 }
 
-module UserRepo = {
+module UserRepo = () => {
   let state: ref<array<User.t>> = ref([])
   let fails: ref<bool> = ref(false)
 

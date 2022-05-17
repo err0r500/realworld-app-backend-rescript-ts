@@ -16,11 +16,12 @@ zora("registration", t => {
     let {getLogs} = module(Logger)
     module UC = Registration.UC(Logger)
 
-    let userRepo = Inmem.UserRepo.make()
+    module UserRepo = Inmem.UserRepo()
+    let {insert, getByName, doesFail} = module(UserRepo)
 
     {
-      "userRepo": userRepo,
-      "pure": UC.do(userRepo.insert),
+      "userRepo": {"insert": insert, "getByName": getByName, "doesFail": doesFail},
+      "pure": UC.do(insert),
       "getLogs": getLogs,
     }
   }
@@ -31,6 +32,27 @@ zora("registration", t => {
     email: user.email->User.unEmail,
   }
 
+  let check = (t: string, r: result<User.t, Prelude.Err.t<Registration.businessErrors>>) =>
+    switch r {
+    | Ok(_) => {
+        Js.Console.log2(t, "ok")
+        r
+      }
+    | Error(Err.Tech) => {
+        Js.Console.log2(t, "err tech")
+        r
+      }
+
+    | Error(Err.Business(UserConflict)) => {
+        Js.Console.log2(t, "err business user conflict")
+        r
+      }
+    | Error(Err.Business(InvalidInput(_))) => {
+        Js.Console.log2(t, "err business invalid input")
+        r
+      }
+    }
+
   t->test("happy patth", t => {
     // G
     let ctx = make()
@@ -40,7 +62,7 @@ zora("registration", t => {
 
     // T
     res->then(r => {
-      t->equal(r, Ok(matthieu), "returns the user")
+      t->equal(check("happy", r), Ok(matthieu), "returns the user")
       t->equal(ctx["getLogs"]()->Js.Array.length, 0, "no logs")
       done()
     })
@@ -49,7 +71,7 @@ zora("registration", t => {
   t->test("technical error", t => {
     // G
     let ctx = make()
-    ctx["userRepo"].doesFail()->ignore
+    ctx["userRepo"]["doesFail"]()->ignore
     t->equal(ctx["getLogs"]()->Js.Array.length, 0, "check")
 
     // W
@@ -57,7 +79,7 @@ zora("registration", t => {
 
     // T
     res->then(r => {
-      t->equal(r, Error(Err.Tech), "returns an Err.Tech")
+      t->equal(check("tech", r), Error(Err.Tech), "returns an Err.Tech")
       t->equal(ctx["getLogs"]()->Js.Array.length, 1, "logged err")
       done()
     })
@@ -67,7 +89,7 @@ zora("registration", t => {
     // G
     let ctx = make()
     let preConditions =
-      ctx["userRepo"].insert(matthieu)->RA.mapErr(_ => t->fail("failed to setup pre-conditions"))
+      ctx["userRepo"]["insert"](matthieu)->RA.mapErr(_ => t->fail("failed to setup pre-conditions"))
 
     t->equal(ctx["getLogs"]()->Js.Array.length, 0, "check")
 
@@ -76,7 +98,11 @@ zora("registration", t => {
 
     // T
     res->then(r => {
-      t->equal(r, Error(Err.Business(Registration.UserConflict)), "returns a UserConflict error")
+      t->equal(
+        check("business", r),
+        Error(Err.Business(Registration.UserConflict)),
+        "returns a UserConflict error",
+      )
       t->equal(ctx["getLogs"]()->Js.Array.length, 1, "logged err")
       done()
     })

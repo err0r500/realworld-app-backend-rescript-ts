@@ -3,7 +3,7 @@ module RA = ResultAsync
 
 type businessErrors =
   | UserConflict
-  | InvalidInput(list<string>)
+  | InvalidInput(array<string>)
 
 type input = {name: string, email: string, password: string}
 type pure = input => RA.t<User.t, Err.t<businessErrors>>
@@ -11,25 +11,30 @@ type pure = input => RA.t<User.t, Err.t<businessErrors>>
 @genType type usecase = Adapters.UserRepo.insert => pure
 
 module UC = (Logger: Adapters.Logger) => {
-  let do: usecase = urInsert => {
+  let do: usecase = userRepoInsert => {
     let pure: pure = ({name, email, password}) => {
-      let userToInsert: User.t = {
-        name: Name(name),
-        email: Email(email),
-        password: Password(password),
-        bio: Bio(None),
-        imageLink: ImageLink(None),
+      module Steps = {
+        let validateUser =
+          User.makeNewUser
+          ->Validation.map(User.mkName(name))
+          ->Validation.apply(User.mkEmail(email))
+          ->Validation.apply(User.mkPassord(password))
+          ->RA.fromValidation
+          ->RA.mapErr(ee => Err.Business(InvalidInput(ee)))
+
+        let insertUser = user =>
+          userRepoInsert(user)
+          ->RA.mapErr(insertError => {
+            switch insertError {
+            | Err.Business(EmailConflict) =>
+              Err.business(UserConflict)->Logger.error("userRepo.insert")
+            | Err.Tech => Err.Tech->Logger.error("userRepo.insert")
+            }
+          })
+          ->RA.map(_ => user)
       }
 
-      userToInsert
-      ->urInsert
-      ->RA.flatMap(_ => RA.ok(userToInsert))
-      ->RA.mapErr(e => {
-        switch e {
-        | Err.Business(EmailConflict) => Err.business(UserConflict)->Logger.error("userRepo.insert")
-        | Err.Tech => Err.Tech->Logger.error("userRepo.insert")
-        }
-      })
+      Steps.validateUser->RA.flatMap(Steps.insertUser)
     }
 
     pure
